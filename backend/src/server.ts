@@ -4,6 +4,11 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { initializeSocket } from './socket';
+import routes from './routes';
+import { errorHandler, notFound } from './middleware/error.middleware';
+import { rateLimit } from './middleware/rateLimit.middleware';
+import { logger } from './utils/logger';
+import { connectDatabase } from './utils/database';
 
 dotenv.config();
 
@@ -15,21 +20,55 @@ const { io, userSockets } = initializeSocket(httpServer);
 app.set('io', io);
 app.set('userSockets', userSockets);
 
+// Trust proxy (important for deployment behind reverse proxy)
+app.set('trust proxy', 1);
+
+// Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN?.split(',') || 'http://localhost:5173',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Routes will be imported here
-// import authRoutes from './routes/auth.routes';
-// import taskRoutes from './routes/task.routes';
-// app.use('/api/v1/auth', authRoutes);
-// app.use('/api/v1/tasks', taskRoutes);
+// Rate limiting
+app.use(rateLimit());
+
+// Request logging
+app.use((req, res, next) => {
+  logger.request(req);
+  next();
+});
+
+// API routes
+app.use('/api/v1', routes);
+
+// 404 handler
+app.use(notFound);
+
+// Error handling middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start server
+const startServer = async () => {
+  try {
+    await connectDatabase();
+    
+    httpServer.listen(PORT, () => {
+      logger.info(`🚀 Server running on port ${PORT}`);
+      logger.info(`📡 Socket.io ready for connections`);
+      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
+      logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
+
+export default app;
