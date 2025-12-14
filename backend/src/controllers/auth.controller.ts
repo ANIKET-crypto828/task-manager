@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../types';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -73,7 +71,7 @@ export class AuthController {
       return res.status(201).json({ user, token });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors[0].message });
+        return res.status(400).json({ error: error.issues[0].message });
       }
       console.error('Register error:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -127,7 +125,7 @@ export class AuthController {
       return res.status(200).json({ user: userWithoutPassword, token });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors[0].message });
+        return res.status(400).json({ error: error.issues[0].message });
       }
       console.error('Login error:', error);
       return res.status(500).json({ error: 'Internal server error' });

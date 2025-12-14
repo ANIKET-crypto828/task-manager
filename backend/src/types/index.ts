@@ -1,4 +1,5 @@
 import { Priority, Status } from '@prisma/client';
+import { Request } from 'express';
 
 export interface CreateUserDto {
   email: string;
@@ -34,6 +35,7 @@ export interface JwtPayload {
   email: string;
 }
 
-export interface AuthenticatedRequest extends Express.Request {
+// Fixed: extend from express.Request instead of Express.Request
+export interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
