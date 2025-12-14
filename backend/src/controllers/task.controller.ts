@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { TaskService } from '../services/task.service';
 import { AuthenticatedRequest } from '../types';
 import { createTaskSchema, updateTaskSchema } from '../validators/task.validator';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { emitTaskUpdate, emitTaskAssigned } from '../socket';
 
@@ -62,8 +62,16 @@ export class TaskController {
     try {
       const validatedData = createTaskSchema.parse(req.body);
 
+      // Convert dueDate string to Date if needed
+      const taskData = {
+        ...validatedData,
+        dueDate: typeof validatedData.dueDate === 'string' 
+          ? new Date(validatedData.dueDate) 
+          : validatedData.dueDate,
+      };
+
       const task = await taskService.createTask(
-        validatedData,
+        taskData,
         req.user!.userId
       );
 
@@ -96,8 +104,8 @@ export class TaskController {
 
       return res.status(201).json(task);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors[0].message });
+      if (error instanceof ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
       }
       console.error('Create task error:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -116,9 +124,15 @@ export class TaskController {
       // Get old task data for audit log
       const oldTask = await taskService.getTaskById(id, req.user!.userId);
 
+      // Convert dueDate string to Date if needed
+      const taskData: any = { ...validatedData };
+      if (taskData.dueDate && typeof taskData.dueDate === 'string') {
+        taskData.dueDate = new Date(taskData.dueDate);
+      }
+
       const task = await taskService.updateTask(
         id,
-        validatedData,
+        taskData,
         req.user!.userId
       );
 
@@ -157,8 +171,8 @@ export class TaskController {
 
       return res.status(200).json(task);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors[0].message });
+      if (error instanceof ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
       }
       console.error('Update task error:', error);
       if ((error as any).message === 'Task not found') {
