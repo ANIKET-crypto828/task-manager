@@ -1,5 +1,5 @@
 import { api } from './api';
-import { Task, CreateTaskDto, UpdateTaskDto, User } from '../types';
+import { type Task, type CreateTaskDto, type UpdateTaskDto, type User } from '../types';
 
 export const taskService = {
   async getTasks(filters?: { status?: string; priority?: string }): Promise<Task[]> {
