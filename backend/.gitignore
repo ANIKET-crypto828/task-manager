@@ -44,3 +44,5 @@ prisma/*.db-journal
 .cache/
 temp/
 tmp/
+
+.env
