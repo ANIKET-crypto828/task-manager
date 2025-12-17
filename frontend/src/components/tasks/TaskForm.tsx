@@ -33,6 +33,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   mode,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { data: users } = useSWR('users', userService.getUsers);
 
   const {
@@ -51,7 +52,21 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const handleFormSubmit = async (data: TaskFormData) => {
     try {
       setLoading(true);
-      await onSubmit(data as CreateTaskDto);
+      setError('');
+      
+      // Convert datetime-local format to ISO 8601 with timezone
+      const formattedData = {
+        ...data,
+        dueDate: new Date(data.dueDate).toISOString(),
+        // Only include assignedToId if it's not empty
+        assignedToId: data.assignedToId || undefined,
+      };
+      
+      await onSubmit(formattedData as CreateTaskDto);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to save task';
+      setError(errorMessage);
+      console.error('Task form error:', err);
     } finally {
       setLoading(false);
     }
@@ -73,6 +88,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         </div>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="p-6 space-y-6">
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Title *

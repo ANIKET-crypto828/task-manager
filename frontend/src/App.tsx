@@ -8,6 +8,7 @@ import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm';
 import { Dashboard } from './pages/Dashboard';
 import { TaskList } from './components/tasks/TaskList';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
               <Route element={<Layout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/tasks" element={<TaskList />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
 
               <Route path="/" element={<Navigate to="/dashboard" />} />

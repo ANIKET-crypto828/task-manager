@@ -9,6 +9,7 @@ import { errorHandler, notFound } from './middleware/error.middleware';
 import { rateLimit } from './middleware/rateLimit.middleware';
 import { logger } from './utils/logger';
 import { connectDatabase } from './utils/database';
+import notificationRoutes from './routes/notification.routes';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 
 // API routes
 app.use('/api/v1', routes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // 404 handler
 app.use(notFound);

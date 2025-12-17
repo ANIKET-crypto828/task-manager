@@ -16,6 +16,14 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+// NEW: Profile update validation schema
+const updateProfileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters').optional(),
+  email: z.string().email('Invalid email address').optional(),
+}).refine(data => data.name || data.email, {
+  message: 'At least one field (name or email) must be provided',
+});
+
 export class AuthController {
   /**
    * Register a new user
@@ -177,15 +185,31 @@ export class AuthController {
   /**
    * Update user profile
    * PUT /api/v1/auth/profile
+   * IMPROVED: Added validation and email uniqueness check
    */
   async updateProfile(req: AuthenticatedRequest, res: Response) {
     try {
-      const { name, email } = req.body;
+      // Validate input
+      const validatedData = updateProfileSchema.parse(req.body);
+      const { name, email } = validatedData;
 
+      // If email is being updated, check if it's already taken by another user
+      if (email) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (existingUser && existingUser.id !== req.user!.userId) {
+          return res.status(400).json({ error: 'Email already in use' });
+        }
+      }
+
+      // Build update data
       const updateData: any = {};
-      if (name) updateData.name = name;
-      if (email) updateData.email = email;
+      if (name !== undefined) updateData.name = name;
+      if (email !== undefined) updateData.email = email;
 
+      // Update user
       const user = await prisma.user.update({
         where: { id: req.user!.userId },
         data: updateData,
@@ -200,6 +224,15 @@ export class AuthController {
 
       return res.status(200).json(user);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
+      }
+      
+      // Handle Prisma unique constraint violation
+      if ((error as any).code === 'P2002') {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+
       console.error('Update profile error:', error);
       return res.status(500).json({ error: 'Internal server error' });
     }
