@@ -17,7 +17,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!user) return;
 
-    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://task-manager-6jz8.onrender.com';
     
     socketRef.current = io(SOCKET_URL, {
       withCredentials: true,

@@ -26,7 +26,7 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN?.split(',') || 'https://task-manager-frontend-sandy-theta.vercel.app/',
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -62,7 +62,7 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📡 Socket.io ready for connections`);
-      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
+      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/'}`);
       logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {

@@ -1,4 +1,3 @@
-// services/notification.service.ts
 import { api } from './api';
 import { type Notification } from '../types';
 
