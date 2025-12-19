@@ -466,9 +466,8 @@ npm run test:coverage
 # Run tests in watch mode
 npm run test:watch
 
-# Run specific test suite
-npm run test:unit          # Service tests only
-npm run test:integration   # Repository tests only
+# Run tests for CI/CD Optimization
+npm run test:ci
 ```
 
 ### Test Coverage
