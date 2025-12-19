@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { taskService } from '../services/task.service';
-import { type Task, type CreateTaskDto, type UpdateTaskDto } from '../types';
+import { type CreateTaskDto, type UpdateTaskDto } from '../types';
 
 export const useTasks = (filters?: { status?: string; priority?: string }) => {
   const { data, error, isLoading, mutate } = useSWR(

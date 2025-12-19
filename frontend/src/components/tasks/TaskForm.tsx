@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Priority, Status, type CreateTaskDto } from '../../types';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 import { userService } from '../../services/task.service';
-import { getDateInputValue } from '../../utils/date';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
@@ -39,7 +38,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),

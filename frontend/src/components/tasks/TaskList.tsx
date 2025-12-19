@@ -4,7 +4,7 @@ import { TaskCard } from './TaskCard';
 import { TaskForm } from './TaskForm';
 import { TaskSkeleton } from './TaskSkeleton';
 import { Priority, Status, type CreateTaskDto, type Task } from '../../types';
-import { Plus, Filter, SortAsc } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { mutate } from 'swr';
 
 export const TaskList: React.FC = () => {

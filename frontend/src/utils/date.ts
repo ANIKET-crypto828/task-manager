@@ -1,4 +1,4 @@
-import { format, isAfter, isBefore, parseISO } from 'date-fns';
+import { format, isBefore, parseISO } from 'date-fns';
 
 export const formatDate = (date: string | Date): string => {
   return format(new Date(date), 'MMM dd, yyyy');

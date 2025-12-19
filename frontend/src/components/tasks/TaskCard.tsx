@@ -3,7 +3,7 @@ import { type Task } from '../../types';
 import { formatDate, isOverdue } from '../../utils/date';
 import { getPriorityBadge } from '../../utils/priority';
 import { getStatusColor, getStatusLabel } from '../../utils/status';
-import { Calendar, User, Clock, AlertTriangle } from 'lucide-react';
+import { Calendar, User, AlertTriangle } from 'lucide-react';
 import clsx from 'clsx';
 
 interface TaskCardProps {
