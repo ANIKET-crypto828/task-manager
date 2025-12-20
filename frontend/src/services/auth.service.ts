@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, clearAuthCache } from './api';
 import { type AuthResponse, type LoginCredentials, type RegisterCredentials, type User } from '../types';
 
 export const authService = {
@@ -14,6 +14,7 @@ export const authService = {
 
   async logout(): Promise<void> {
     await api.post('/auth/logout');
+    clearAuthCache();
   },
 
   async getCurrentUser(): Promise<User> {

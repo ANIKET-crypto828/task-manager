@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useRef } from 'react';
 import  { type ReactNode } from 'react';
 import { authService } from '../services/auth.service';
 import { type User, type LoginCredentials, type RegisterCredentials } from '../types';
@@ -17,9 +17,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasCheckedAuth = useRef(false); 
 
   useEffect(() => {
-    checkAuth();
+    // Only check auth once when the provider mounts
+    if (!hasCheckedAuth.current) {
+      hasCheckedAuth.current = true;
+      checkAuth();
+    }
   }, []);
 
   const checkAuth = async () => {
