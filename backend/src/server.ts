@@ -28,13 +28,10 @@ app.set('trust proxy', 1);
 app.use(cors({
   origin: [
        'https://task-manager-frontend-sandy-theta.vercel.app',
-       'https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app',
-       'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app',
+       'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app'
      ],
   credentials: true,
 }));
-
-app.use(rateLimit());
 
    /*const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://task-manager-frontend-sandy-theta.vercel.app'] || ['https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app/'] || ['https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/'];
    app.use(cors({
