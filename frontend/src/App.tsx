@@ -14,7 +14,10 @@ function App() {
     <SWRConfig
       value={{
         revalidateOnFocus: false,
+        revalidateOnReconnect: false,  // ADDED: Prevent revalidation on reconnect
         shouldRetryOnError: false,
+        dedupingInterval: 10000,        // ADDED: Dedupe requests within 10 seconds
+        refreshInterval: 0,             // ADDED: Disable automatic refresh
       }}
     >
       <BrowserRouter>
