@@ -25,16 +25,16 @@ app.set('userSockets', userSockets);
 app.set('trust proxy', 1);
 
 // Middleware
-app.use(cors({
+/*app.use(cors({
   origin: [
        'https://task-manager-frontend-sandy-theta.vercel.app'
      ],
   credentials: true,
-}));
+}));*/
 
 app.use(rateLimit());
 
-   /*const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://task-manager-frontend-sandy-theta.vercel.app'];
+   const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://task-manager-frontend-sandy-theta.vercel.app'] || ['https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app/'] || ['https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/'];
    app.use(cors({
      origin: (origin, callback) => {
        if (!origin || allowedOrigins.includes(origin)) {
@@ -44,7 +44,7 @@ app.use(rateLimit());
        }
      },
      credentials: true,
-   }));*/
+   }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -86,7 +86,7 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📡 Socket.io ready for connections`);
-      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/'}`);
+      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/' || 'https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app/' || 'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/'}`);
       logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {

@@ -4,7 +4,7 @@ import { Server as HttpServer } from 'http';
 export const initializeSocket = (server: HttpServer) => {
   const io = new SocketServer(server, {
     cors: {
-      origin: process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/',
+      origin: process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/' || 'https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app/' || 'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/',
       credentials: true,
     },
   });
