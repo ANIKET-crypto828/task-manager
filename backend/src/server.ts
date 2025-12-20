@@ -32,6 +32,8 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use(rateLimit());
+
    /*const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://task-manager-frontend-sandy-theta.vercel.app'];
    app.use(cors({
      origin: (origin, callback) => {
