@@ -50,8 +50,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Rate limiting
-app.use(rateLimit());
 
 // Request logging
 app.use((req, res, next) => {
