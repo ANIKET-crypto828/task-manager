@@ -25,13 +25,22 @@ app.set('userSockets', userSockets);
 app.set('trust proxy', 1);
 
 // Middleware
+/*
 app.use(cors({
   origin: [
        'https://task-manager-frontend-sandy-theta.vercel.app',
        'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app'
      ],
   credentials: true,
-}));
+}));*/
+
+app.use(
+  cors({
+    origin: "https://task-manager-frontend-sandy-theta.vercel.app",
+    credentials: true,
+  })
+);
+
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

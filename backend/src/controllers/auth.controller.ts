@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { z } from 'zod';
-import { AuthenticatedRequest } from '../types';
-import prisma from '../lib/prisma';
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { z } from "zod";
+import { AuthenticatedRequest } from "../types";
+import prisma from "../lib/prisma";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -17,23 +17,29 @@ const loginSchema = z.object({
 });
 
 // Profile update validation schema
-const updateProfileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters').optional(),
-  email: z.string().email('Invalid email address').optional(),
-}).refine(data => data.name || data.email, {
-  message: 'At least one field (name or email) must be provided',
-});
+const updateProfileSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be less than 50 characters")
+      .optional(),
+    email: z.string().email("Invalid email address").optional(),
+  })
+  .refine((data) => data.name || data.email, {
+    message: "At least one field (name or email) must be provided",
+  });
 
 // Helper function to get cookie options based on environment
 const getCookieOptions = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
+  const isProduction = process.env.NODE_ENV === "production";
+
   return {
     httpOnly: true,
     secure: isProduction, // true in production (HTTPS required)
-    sameSite: isProduction ? 'none' as const : 'lax' as const, // 'none' for cross-origin in production
+    sameSite: isProduction ? ("none" as const) : ("lax" as const), // 'none' for cross-origin in production
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/',
+    path: "/",
   };
 };
 
@@ -52,7 +58,7 @@ export class AuthController {
       });
 
       if (existingUser) {
-        return res.status(400).json({ error: 'Email already registered' });
+        return res.status(400).json({ error: "Email already registered" });
       }
 
       // Hash password
@@ -78,21 +84,23 @@ export class AuthController {
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
+        { expiresIn: "7d" }
       );
 
       // Set cookie with proper cross-origin settings
-      res.cookie('token', token, getCookieOptions());
+      res.cookie("token", token, getCookieOptions());
 
-      console.log(`✓ User registered: ${user.email} (NODE_ENV: ${process.env.NODE_ENV})`);
+      console.log(
+        `✓ User registered: ${user.email} (NODE_ENV: ${process.env.NODE_ENV})`
+      );
 
       return res.status(201).json({ user, token });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.issues[0].message });
       }
-      console.error('Register error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      console.error("Register error:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -110,7 +118,7 @@ export class AuthController {
       });
 
       if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ error: "Invalid credentials" });
       }
 
       // Verify password
@@ -120,30 +128,37 @@ export class AuthController {
       );
 
       if (!isValidPassword) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ error: "Invalid credentials" });
       }
 
       // Generate JWT
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
+        { expiresIn: "7d" }
       );
 
       // Set cookie with proper cross-origin settings
-      res.cookie('token', token, getCookieOptions());
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true, // 🔥 REQUIRED on HTTPS (Vercel + Render)
+        sameSite: "none", // 🔥 REQUIRED for cross-origin
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       const { password, ...userWithoutPassword } = user;
 
-      console.log(`✓ User logged in: ${user.email} (NODE_ENV: ${process.env.NODE_ENV})`);
+      console.log(
+        `✓ User logged in: ${user.email} (NODE_ENV: ${process.env.NODE_ENV})`
+      );
 
       return res.status(200).json({ user: userWithoutPassword, token });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.issues[0].message });
       }
-      console.error('Login error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      console.error("Login error:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -153,23 +168,29 @@ export class AuthController {
    */
   async logout(req: Request, res: Response) {
     try {
-      const isProduction = process.env.NODE_ENV === 'production';
-      
+      const isProduction = process.env.NODE_ENV === "production";
+
       // Clear cookie with same settings as when it was set
-      res.cookie('token', '', {
+      /*res.cookie("token", "", {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'none' as const : 'lax' as const,
+        sameSite: isProduction ? ("none" as const) : ("lax" as const),
         expires: new Date(0), // Expire immediately
-        path: '/',
+        path: "/",
+      });*/
+
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
       });
-      
-      console.log('✓ User logged out');
-      
-      return res.status(200).json({ message: 'Logged out successfully' });
+
+      console.log("✓ User logged out");
+
+      return res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
-      console.error('Logout error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      console.error("Logout error:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -191,13 +212,13 @@ export class AuthController {
       });
 
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: "User not found" });
       }
 
       return res.status(200).json(user);
     } catch (error) {
-      console.error('Get current user error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      console.error("Get current user error:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -218,7 +239,7 @@ export class AuthController {
         });
 
         if (existingUser && existingUser.id !== req.user!.userId) {
-          return res.status(400).json({ error: 'Email already in use' });
+          return res.status(400).json({ error: "Email already in use" });
         }
       }
 
@@ -247,14 +268,14 @@ export class AuthController {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.issues[0].message });
       }
-      
+
       // Handle Prisma unique constraint violation
-      if ((error as any).code === 'P2002') {
-        return res.status(400).json({ error: 'Email already in use' });
+      if ((error as any).code === "P2002") {
+        return res.status(400).json({ error: "Email already in use" });
       }
 
-      console.error('Update profile error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      console.error("Update profile error:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 }
