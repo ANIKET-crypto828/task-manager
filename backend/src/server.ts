@@ -26,9 +26,24 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || 'https://task-manager-frontend-sandy-theta.vercel.app/',
+  origin: [
+       'https://task-manager-frontend-sandy-theta.vercel.app'
+     ],
   credentials: true,
 }));
+
+   /*const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://task-manager-frontend-sandy-theta.vercel.app'];
+   app.use(cors({
+     origin: (origin, callback) => {
+       if (!origin || allowedOrigins.includes(origin)) {
+         callback(null, true);
+       } else {
+         callback(new Error('Not allowed by CORS'));
+       }
+     },
+     credentials: true,
+   }));*/
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
