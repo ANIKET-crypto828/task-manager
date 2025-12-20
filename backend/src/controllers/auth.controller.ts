@@ -16,13 +16,26 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-// NEW: Profile update validation schema
+// Profile update validation schema
 const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters').optional(),
   email: z.string().email('Invalid email address').optional(),
 }).refine(data => data.name || data.email, {
   message: 'At least one field (name or email) must be provided',
 });
+
+// Helper function to get cookie options based on environment
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  return {
+    httpOnly: true,
+    secure: isProduction, // true in production (HTTPS required)
+    sameSite: isProduction ? 'none' as const : 'lax' as const, // 'none' for cross-origin in production
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/',
+  };
+};
 
 export class AuthController {
   /**
@@ -68,13 +81,10 @@ export class AuthController {
         { expiresIn: '7d' }
       );
 
-      // Set cookie
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      // Set cookie with proper cross-origin settings
+      res.cookie('token', token, getCookieOptions());
+
+      console.log(`✓ User registered: ${user.email} (NODE_ENV: ${process.env.NODE_ENV})`);
 
       return res.status(201).json({ user, token });
     } catch (error) {
@@ -120,15 +130,12 @@ export class AuthController {
         { expiresIn: '7d' }
       );
 
-      // Set cookie
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      // Set cookie with proper cross-origin settings
+      res.cookie('token', token, getCookieOptions());
 
       const { password, ...userWithoutPassword } = user;
+
+      console.log(`✓ User logged in: ${user.email} (NODE_ENV: ${process.env.NODE_ENV})`);
 
       return res.status(200).json({ user: userWithoutPassword, token });
     } catch (error) {
@@ -146,7 +153,19 @@ export class AuthController {
    */
   async logout(req: Request, res: Response) {
     try {
-      res.clearCookie('token');
+      const isProduction = process.env.NODE_ENV === 'production';
+      
+      // Clear cookie with same settings as when it was set
+      res.cookie('token', '', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' as const : 'lax' as const,
+        expires: new Date(0), // Expire immediately
+        path: '/',
+      });
+      
+      console.log('✓ User logged out');
+      
       return res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
       console.error('Logout error:', error);
@@ -185,7 +204,6 @@ export class AuthController {
   /**
    * Update user profile
    * PUT /api/v1/auth/profile
-   * IMPROVED: Added validation and email uniqueness check
    */
   async updateProfile(req: AuthenticatedRequest, res: Response) {
     try {
@@ -221,6 +239,8 @@ export class AuthController {
           updatedAt: true,
         },
       });
+
+      console.log(`✓ Profile updated for user: ${user.email}`);
 
       return res.status(200).json(user);
     } catch (error) {
