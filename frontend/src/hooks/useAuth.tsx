@@ -1,7 +1,8 @@
-import { useState, useEffect, createContext, useContext, useRef } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { type ReactNode } from 'react';
 import { authService } from '../services/auth.service';
 import { type User, type LoginCredentials, type RegisterCredentials } from '../types';
+import { useLocation } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -24,55 +25,28 @@ const globalAuthCheck = {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(globalAuthCheck.cachedUser);
   const [loading, setLoading] = useState(true);
-  const mounted = useRef(false);
+  const location = useLocation();
 
   useEffect(() => {
-    // Only run once when component first mounts
-    if (mounted.current) return;
-    mounted.current = true;
+    //  Skip auth check on public routes
+    if (location.pathname === "/login" || location.pathname === "/register") {
+      setLoading(false);
+      return;
+    }
 
     const checkAuth = async () => {
-      const now = Date.now();
-      
-      // If checked within last 10 seconds, use cached result
-      if (now - globalAuthCheck.lastCheck < 10000 && globalAuthCheck.cachedUser !== undefined) {
-        setUser(globalAuthCheck.cachedUser);
-        setLoading(false);
-        return;
-      }
-
-      // Prevent concurrent checks
-      if (globalAuthCheck.inProgress) {
-        // Wait for ongoing check to complete
-        const checkInterval = setInterval(() => {
-          if (!globalAuthCheck.inProgress) {
-            clearInterval(checkInterval);
-            setUser(globalAuthCheck.cachedUser);
-            setLoading(false);
-          }
-        }, 100);
-        return;
-      }
-
-      globalAuthCheck.inProgress = true;
-      
       try {
         const currentUser = await authService.getCurrentUser();
-        globalAuthCheck.cachedUser = currentUser;
-        globalAuthCheck.lastCheck = Date.now();
         setUser(currentUser);
-      } catch (error) {
-        globalAuthCheck.cachedUser = null;
-        globalAuthCheck.lastCheck = Date.now();
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);
-        globalAuthCheck.inProgress = false;
       }
     };
 
     checkAuth();
-  }, []); // Empty dependency array - run only once
+  }, [location.pathname]);
 
   const login = async (credentials: LoginCredentials) => {
     const { user } = await authService.login(credentials);

@@ -33,21 +33,10 @@ app.use(cors({
   credentials: true,
 }));
 
-   /*const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://task-manager-frontend-sandy-theta.vercel.app'] || ['https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app/'] || ['https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/'];
-   app.use(cors({
-     origin: (origin, callback) => {
-       if (!origin || allowedOrigins.includes(origin)) {
-         callback(null, true);
-       } else {
-         callback(new Error('Not allowed by CORS'));
-       }
-     },
-     credentials: true,
-   }));*/
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+app.use(rateLimit()); 
 
 
 // Request logging
