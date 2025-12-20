@@ -74,7 +74,7 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📡 Socket.io ready for connections`);
-      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/' || 'https://task-manager-frontend-o9pby0kkp-aniket-santras-projects.vercel.app/' || 'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/'}`);
+      logger.info(`🌍 CORS enabled for: ${process.env.CORS_ORIGIN || 'https://task-manager-frontend-sandy-theta.vercel.app/' ||  'https://task-manager-frontend-git-main-aniket-santras-projects.vercel.app/'}`);
       logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
